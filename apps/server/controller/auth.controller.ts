@@ -104,8 +104,8 @@ export const tokenVerifyController = async (
   }
   try {
     jwt.verify(refreshToken, process.env.JWT_SECRET || JWT_SECRET);
-    res.json({ valid: true });
+    res.status(200).json({ valid: true });
   } catch (error) {
-    res.status(401).json({ valid: false, message: "Invalid or expired token" });
+    res.status(400).json({ valid: false, message: "Invalid or expired token" });
   }
 };

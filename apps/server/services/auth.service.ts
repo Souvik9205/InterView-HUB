@@ -262,7 +262,7 @@ export const refreshTokenService = async (
       error.name === "JsonWebTokenError"
     ) {
       return {
-        status: 401,
+        status: 400,
         accessToken: "",
         message: "Unauthorized",
       };

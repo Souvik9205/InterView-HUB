@@ -10,8 +10,9 @@ const authRouter = Router();
 
 authRouter.post("/login", loginController);
 authRouter.post("/signup", signupController);
-authRouter.post("/token-verify", tokenVerifyController);
-authRouter.post("/regenerate-token", regenerateTokenController);
 authRouter.post("/otp-verify", OTPVerificationController);
+
+authRouter.get("/token-verify", tokenVerifyController);
+authRouter.get("/regenerate-token", regenerateTokenController);
 
 export default authRouter;
