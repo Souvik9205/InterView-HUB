@@ -3,7 +3,7 @@ import time
 import mediapipe as mp
 import numpy as np
 from collections import defaultdict
-
+from tensorflow.keras.models import load_model
 
 
 def calculate_ear(eye_landmarks):
@@ -69,7 +69,24 @@ def detect_head_turn(landmarks, frame_width):
 
 
 def analyze_face():
-    cap = cv2.VideoCapture(0)  # Start video capture
+    # Attempt to open the external webcam (index 2) using the V4L2 backend
+    external_cam_index = 2
+    cap = cv2.VideoCapture(external_cam_index, cv2.CAP_V4L2)
+
+    if not cap.isOpened():
+        print(f"Failed to open camera index {external_cam_index}. Falling back to webcam index 0.")
+        cap = cv2.VideoCapture(1)
+        if not cap.isOpened():
+            print("Failed to open fallback webcam index 0. Exiting.")
+            exit(1)
+        else:
+            print("Fallback webcam index 0 opened successfully.")
+    else:
+        print(f"Camera index {external_cam_index} opened successfully.")
+    
+
+
+
     start_time = time.time()
     duration = 30  # 30 seconds
 
@@ -81,6 +98,17 @@ def analyze_face():
     min_lookaway_duration=0.8
     lookaway_start,lookaway_end=0,0
     times_looked_away=0
+
+    emotions_results = {
+        'Angry':0,
+        'Disgust':0,
+        'Fear':0,
+        'Happy':0,
+        'Neutral':0,
+        'Sad':0,
+        'Surprise':0
+    }
+    emotions_percentages={}
 
     blink_count = 0
     blink_threshold = 0.34  # EAR threshold for blink detection
@@ -95,8 +123,22 @@ def analyze_face():
 
 
 
+    # Load the pre-trained emotion detection model and the Haar cascade classifier for face detection
+    model = load_model('model_file_30epochs.h5')
+    faceDetect = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-    
+    labels_dict = {
+        0: 'Angry',
+        1: 'Disgust',
+        2: 'Fear',
+        3: 'Happy',
+        4: 'Neutral',
+        5: 'Sad',
+        6: 'Surprise'
+    }
+
+    prev_time = time.time()
+
 
     while time.time() - start_time < duration:
         ret, frame = cap.read()
@@ -104,7 +146,38 @@ def analyze_face():
             break
         
         frame = cv2.flip(frame, 1)  # Flip video output
+
+       
+        
         h, w, _ = frame.shape
+
+        # Calculate and display FPS
+        curr_time = time.time()
+        fps = 1.0 / (curr_time - prev_time) if (curr_time - prev_time) > 0 else 0
+        prev_time = curr_time
+        # Calculate the text size to determine the width of the text
+
+        text = f"FPS: {fps:.2f}"
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.7
+        thickness = 2
+
+        # Get text size (width, height)
+        text_size = cv2.getTextSize(text, font, font_scale, thickness)[0]
+
+        # Get the width of the frame (image)
+        frame_width = frame.shape[1]
+
+        # Calculate the position to place the text on the right side
+        x_position = frame_width - text_size[0] - 10  # 10 pixels padding from the right
+
+        cv2.putText(frame, f"FPS: {fps:.2f}", (x_position, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        # Convert frame to grayscale for face detection
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = faceDetect.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=3)
+        
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         face_mesh_results = face_mesh.process(rgb_frame)
         
@@ -148,6 +221,24 @@ def analyze_face():
                 elif avg_ear >= blink_threshold:
                     prev_blink = False
         
+        for (x, y, w, h) in faces:
+            sub_face_img = gray[y:y + h, x:x + w]
+            resized = cv2.resize(sub_face_img, (48, 48))
+            normalized = resized / 255.0
+            reshaped = np.reshape(normalized, (1, 48, 48, 1))
+
+            result = model.predict(reshaped)
+            label_index = np.argmax(result, axis=1)[0]
+            label_text = labels_dict.get(label_index, "Unknown")
+            print("Detected emotion:", label_text)
+
+            #add result to emotions results
+            emotions_results[label_text]+=1
+
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+            cv2.rectangle(frame, (x, y - 40), (x + w, y), (50, 50, 255), cv2.FILLED)
+            cv2.putText(frame, label_text, (x, y - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
         
         # Show video output on screen
         cv2.putText(frame, f"Blinks: {blink_count}", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
@@ -163,11 +254,17 @@ def analyze_face():
     lookaway_frames_percent=round(((lookaway_frames/total_frames)*100),2)
     if lookaway_frames_percent>0 and times_looked_away==0:
         times_looked_away=1
-
-    #printing metrics
+    
+    #printing all metrics
     print(f"\nLookaway Percentage: {lookaway_frames_percent}%")
     print(f"Looked away {times_looked_away} times")
     print(f"Blinked {blink_count} times")
+
+    total_emo=sum(emotions_results.values())
+    for emo in emotions_results.keys():
+        if not emotions_results[emo]==0:
+            emotions_percentages[emo]=round(((emotions_results[emo]/total_emo)*100),2)
+    print("Emotions percentage: ",emotions_percentages)
 
 
 if __name__ == "__main__":
