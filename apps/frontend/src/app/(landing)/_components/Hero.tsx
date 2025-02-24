@@ -7,7 +7,7 @@ const Hero = () => {
     <section className="pb-6 flex items-center flex-col">
       <Image
         src={"/bg.png"}
-        alt="background image"
+        alt="background_image"
         width={1000}
         height={1000}
         className="w-full absolute top-0 left-0"
