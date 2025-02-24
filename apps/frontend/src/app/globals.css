@@ -55,8 +55,7 @@
 
     --chart-5: 27 87% 67%;
 
-    --radius: 0.5rem
-  }
+    --radius: 0.5rem}
   .dark {
 
     --background: 240 10% 3.9%;
@@ -105,8 +104,7 @@
 
     --chart-4: 280 65% 60%;
 
-    --chart-5: 340 75% 55%
-  }
+    --chart-5: 340 75% 55%}
 }
 
 
@@ -118,4 +116,12 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+* {
+  font-size: 18px;
+}
+
+.box::-webkit-scrollbar {
+  display: none;
 }
