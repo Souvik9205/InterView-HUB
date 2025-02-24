@@ -22,6 +22,9 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  jobPosts   JobPost[]
+  interviews Interview[]
 }
 
 model Otp {
@@ -30,4 +33,98 @@ model Otp {
   otp       String
 
   expiresAt DateTime
+}
+
+model JobPost {
+  id              String         @id @default(uuid())
+  ownerId         String
+  owner           User           @relation(fields: [ownerId], references: [id])
+  category        String
+  roles           String[]     
+  videoRequired   Boolean
+  questionType    QuestionType
+  followUp        Boolean
+  totalQuestions  Int
+  resumeRequired  Boolean
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  invites         InterviewInvite[]
+  interviews      Interview[]
+}
+
+model InterviewInvite {
+  id         String         @id @default(uuid())
+  jobPostId  String
+  jobPost    JobPost        @relation(fields: [jobPostId], references: [id])
+  email      String         
+  token      String         
+  status     InviteStatus   @default(PENDING)
+  createdAt  DateTime       @default(now())
+
+  interview Interview?
+}
+
+model Interview {
+  id                String         @id @default(uuid())
+  candidateId       String?        
+  candidate         User?          @relation(fields: [candidateId], references: [id])
+
+  jobPostId         String?        
+  jobPost           JobPost?       @relation(fields: [jobPostId], references: [id])
+
+  interviewInviteId String?        @unique
+  interviewInvite   InterviewInvite? @relation(fields: [interviewInviteId], references: [id])
+  
+  interviewType     InterviewType
+
+  topics            String[]    
+  questionCount     Int?       
+  difficulty        Difficulty?   
+  followUp          Boolean?   
+  
+  status            InterviewStatus  @default(PENDING)
+  evaluationData    Json?        
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  qas               InterviewQA[]
+}
+
+model InterviewQA {
+  id           String    @id @default(uuid())
+  interviewId  String
+  interview    Interview @relation(fields: [interviewId], references: [id])
+  question     String
+  answer       String?   
+  order        Int?      
+  createdAt    DateTime  @default(now())
+}
+
+
+enum QuestionType {
+  HARDCODED
+  AI_GENERATED
+}
+
+enum InterviewType {
+  MOCK
+  JOB
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum InviteStatus {
+  PENDING
+  COMPLETED
+}
+
+enum InterviewStatus {
+  PENDING
+  COMPLETED
 }
