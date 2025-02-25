@@ -1,5 +1,6 @@
 import { addInterviewQAServiceData } from "../types";
 import { decodeToken } from "../utils/decodeToken";
+import { generateContent } from "../utils/Gemini.api";
 import prisma from "../utils/PrismaClient";
 
 export const createInterviewService = async (
@@ -339,6 +340,80 @@ export const addInterviewQAService = async (
         status: 409,
         message: "Wrong Job Type!",
       };
+    }
+
+    // AI Validate
+    const prompt = `
+    Evaluate the following interview Q&A:
+    Question: ${data.question}
+    Answer: ${data.answer}
+    
+    Please provide three integer ratings for out of 5:
+    - Topic Relevance
+    - Fumble
+    - Behaviour
+    
+    Return your answer in the EXACT format:
+    Relevance: <number>
+    Fumble: <number>
+    Behaviour: <number>
+    `;
+
+    const evaluationText = await generateContent(prompt);
+    const ratingRegex =
+      /Relevance:\s*(\d+)[\s\S]*?Fumble:\s*(\d+)[\s\S]*?Behaviour:\s*(\d+)/i;
+    const match = evaluationText.match(ratingRegex);
+    if (!match) {
+      return {
+        status: 500,
+        message: "AI evaluation went wrong",
+      };
+    }
+
+    const newRelevanceRating = parseInt(match[1], 10);
+    const newFumbleRating = parseInt(match[2], 10);
+    const newBehaviourRating = parseInt(match[3], 10);
+
+    const existingEvaluation = await prisma.evaluationData.findUnique({
+      where: { interviewId },
+    });
+
+    if (existingEvaluation) {
+      const oldCount = existingEvaluation.questionCount;
+      const newCount = oldCount + 1;
+
+      const aggregatedRelevance = Math.round(
+        (existingEvaluation.relevanceRatting * oldCount + newRelevanceRating) /
+          newCount
+      );
+      const aggregatedFumble = Math.round(
+        (existingEvaluation.fumbleRatting * oldCount + newFumbleRating) /
+          newCount
+      );
+      const aggregatedBehaviour = Math.round(
+        (existingEvaluation.behaviourRatting * oldCount + newBehaviourRating) /
+          newCount
+      );
+
+      await prisma.evaluationData.update({
+        where: { interviewId },
+        data: {
+          relevanceRatting: aggregatedRelevance,
+          fumbleRatting: aggregatedFumble,
+          behaviourRatting: aggregatedBehaviour,
+          questionCount: newCount,
+        },
+      });
+    } else {
+      await prisma.evaluationData.create({
+        data: {
+          interviewId,
+          relevanceRatting: newRelevanceRating,
+          fumbleRatting: newFumbleRating,
+          behaviourRatting: newBehaviourRating,
+          questionCount: 1,
+        },
+      });
     }
 
     const existingQACount = await prisma.interviewQA.count({
