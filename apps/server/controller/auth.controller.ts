@@ -80,7 +80,7 @@ export const regenerateTokenController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const refreshToken = req.cookies?.refreshToken;
+  const refreshToken = req.headers.authorization?.split(" ")[1];
   if (!refreshToken) {
     res.status(401).json({ message: "Unauthorized" });
     return;
@@ -97,7 +97,7 @@ export const tokenVerifyController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const refreshToken = req.cookies?.refreshToken;
+  const refreshToken = req.headers.authorization?.split(" ")[1];
   if (!refreshToken) {
     res.status(401).json({ message: "Unauthorized" });
     return;
