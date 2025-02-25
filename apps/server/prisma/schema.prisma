@@ -88,7 +88,8 @@ model Interview {
   interviewInvite   InterviewInvite? @relation(fields: [interviewInviteId], references: [id])
   
   status            InterviewStatus  @default(PENDING)
-  evaluationData    Json?        
+  evaluationData    EvaluationData? 
+  feedback          String?     
   
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -106,6 +107,17 @@ model InterviewQA {
   createdAt    DateTime  @default(now())
 }
 
+model EvaluationData {
+  id               String @id @default(uuid())
+  interviewId      String @unique
+  interview        Interview @relation(fields: [interviewId], references: [id])
+
+  relevanceRatting Int @default(0)
+  fumbleRatting    Int @default(0)
+  behaviourRatting Int @default(0)
+
+  questionCount    Int @default(0)
+}
 
 enum QuestionType {
   HARDCODED
