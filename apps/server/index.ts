@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 
 import authRouter from "./routes/auth.routes";
+import jobRouter from "./routes/job.routes";
+import inviteRouter from "./routes/inviteInterview.routes";
+import userRouter from "./routes/user.routes";
 
 const app = express();
 
@@ -17,6 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/job", jobRouter);
+app.use("/api/v1/invite", inviteRouter);
+app.use("/api/v1/user", userRouter);
 
 const PORT = 8080;
 
