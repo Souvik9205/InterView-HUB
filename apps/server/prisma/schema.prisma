@@ -40,18 +40,29 @@ model JobPost {
   ownerId         String
   owner           User           @relation(fields: [ownerId], references: [id])
   category        String
-  roles           String[]     
-  videoRequired   Boolean
-  questionType    QuestionType
-  followUp        Boolean
-  totalQuestions  Int
-  resumeRequired  Boolean
+  roles           String[]       
+  videoRequired   Boolean        @default(false)
+  questionType    QuestionType   @default(AI_GENERATED)
+  followUp        Boolean        @default(true)
+  totalQuestions  Int            @default(5)
+  resumeRequired  Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
   invites         InterviewInvite[]
   interviews      Interview[]
+  jobQuestions    JobQuestion[]
 }
+
+model JobQuestion {
+  id         String   @id @default(uuid())
+  jobPostId  String
+  jobPost    JobPost  @relation(fields: [jobPostId], references: [id])
+  question   String
+  order      Int
+  createdAt  DateTime @default(now())
+}
+
 
 model InterviewInvite {
   id         String         @id @default(uuid())
