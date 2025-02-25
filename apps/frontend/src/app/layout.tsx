@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        cz-shortcut-listen="true"
+        cz-shortcut-listen="false"
         className={`${outfi.className} bg-[#fdfdfd] scroll-smooth w-full overflow-auto min-h-screen antialiased box`}
       >
         {children}
