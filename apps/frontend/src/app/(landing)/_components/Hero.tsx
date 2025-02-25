@@ -1,4 +1,5 @@
-import { Bell, CircleUserRound, MonitorSmartphone, Sparkles } from "lucide-react";
+import { Marquee } from "@/constant";
+import { ArrowRight, Bell, ChevronRight, CircleUserRound, MonitorSmartphone, MoveRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -20,7 +21,10 @@ const Hero = () => {
             Elevate Your Productivity with Clever’s Intelligent Tools for Seamless Task <br></br>and Workflow Management.
           </p>
           <div className="flex gap-5  items-center justify-center w-full">
-            <button className="text-white bg-black border-2 border-black px-6 flex items-center justify-center py-4 rounded-full">Get Start ...</button>
+            <button className="text-white bg-gradient-to-tl from-[#724bff] to-[#4f2dfb]  px-[26px] flex items-center justify-center gap-2 py-[19.6px] rounded-full">
+              Get Start
+              <ChevronRight size={20} />
+            </button>
             <button className="border-2 border-[#d1d1d1] bg-[#F4F7F9] px-6 flex items-center py-4 rounded-full">Learn More</button>
           </div>
         </div>
@@ -34,21 +38,16 @@ const Hero = () => {
           />
         </div>
       </div>
-      <div className="h-[2px] bg-black/10 w-[1000px] mt-6" />
+      <div className=" border-b-2 w-[1000px] mt-6" />
       <div className="flex items-center max-w-[1000px] w-full justify-between my-16">
-        {[
-          { id: 0, title: "Cross-Platform Compatibility", Icon: <MonitorSmartphone /> },
-          { id: 1, title: "Smart Deadline Reminders", Icon: <Bell /> },
-          { id: 2, title: "Smart Deadline Reminders", Icon: <Sparkles /> },
-          { id: 3, title: "Smart Deadline Reminders", Icon: <CircleUserRound /> },
-        ].map((item) => {
+        {Marquee.map((item) => {
           return (
             <div
               key={item.id}
               className={`flex flex-col items-center justify-center gap-2 w-full ${item.id !== 3 ? " border-r-2" : ""}`}
             >
-              <div className="bg-[#eaeaea] p-1.5 border rounded-full">
-                <div className="bg-zinc-800 text-white p-3 rounded-full">{item.Icon}</div>
+              <div className="bg-[#eaeaea] p-2 border rounded-full">
+                <div className="bg-gradient-to-tl from-[#724bff] to-[#4f2dfb]   text-white p-3 rounded-full">{item.Icon}</div>
               </div>
               <h3 className="text-lg font-semibold w-[150px] text-center leading-tight">{item.title}</h3>
             </div>
