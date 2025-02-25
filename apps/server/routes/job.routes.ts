@@ -16,6 +16,6 @@ jobRouter.get("/get", getUserJobPostsController);
 jobRouter.get("/get/:jobId", getJobPostController);
 jobRouter.delete("/delete/:jobId", deleteJobPostController);
 jobRouter.post("/add-questions/:jobId", addJobPostQuestionsController);
-jobRouter.post("/update-question/:jobId", updateJobPostQuestionController);
+jobRouter.post("/update-question/:questionId", updateJobPostQuestionController);
 
 export default jobRouter;
