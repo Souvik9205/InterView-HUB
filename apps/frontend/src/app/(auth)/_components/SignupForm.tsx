@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,8 +16,8 @@ const SignupForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false); // Added state for OTP step
-  const [otp, setOtp] = useState("");
+  const [userData, setUserData] = useState({ name: "", password: "" });
+
   const router = useRouter();
 
   const form = useForm({
@@ -29,54 +30,35 @@ const SignupForm = () => {
   });
 
   const onSubmit = async (values: any) => {
+    // console.log(values);
+    
     setLoading(true);
     setError("");
     setSuccess("");
 
-    if (!otpSent) {
-      // Step 1: Send email only to signup
+    const name = await values.name;
+    const email = await values.email;
+    const password = await values.password;
+
+    if (!name || !email || !password) return setError("Filled all details");
+    else {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/auth/signup", {
+        let res = await fetch("http://localhost:8000/api/v1/auth/signup", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: values.email }), // Only sending email
+          body: JSON.stringify({ email }),
         });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.message || "Signup failed");
+        let data = await res.json();
+        if (res.ok) {
+          setUserData({ name, password }); // Store name and password in state
+          setSuccess("OTP sent to your email.");
+          router.push(`/auth/verify?email=${email}`); // Navigate to OTP page
+        } else if (!res.ok) {
+          setLoading(false); // Set loading to false
+          setError(data.message);
         }
-
-        setOtpSent(true); // Move to OTP step
-        setSuccess("OTP sent to your email. Verify to continue.");
-      } catch (error :any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // Step 2: Verify OTP and complete registration
-      try {
-        const res = await fetch("http://localhost:8000/api/v1/auth/otp-verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: values.email,
-            name: values.name,
-            password: values.password,
-            otp,
-          }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.message || "OTP verification failed");
-        }
-
-        setSuccess("Signup successful! Redirecting...");
-        router.push("/dashboard");
-      } catch (error: any) {
-        setError(error.message);
+      } catch (error) {
+        console.log("Error in sign up", error);
+        setLoading(false); // Set loading to false
       } finally {
         setLoading(false);
       }
@@ -84,7 +66,7 @@ const SignupForm = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 w-[300px]">
+    <div className="flex flex-col items-center justify-center gap-3 w-[300px] ">
       <Image
         src="/demo-logo.png"
         width={400}
@@ -92,21 +74,44 @@ const SignupForm = () => {
         alt="logo"
         className="w-24"
       />
-      <h1 className="text-2xl font-semibold">Welcome.</h1>
-      <p className="text-center text-[#6b7280] text-sm -mt-1">Sign up to create your account.</p>
+      <h1 className="text-2xl font-semibold">.Welcome back.</h1>
+      <p className="text-center text-[#6b7280] text-sm -mt-1">
+        Sign in to access to your dashboard,
+        <br /> settings and projects
+      </p>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full gap-3 flex flex-col"
+          noValidate
         >
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className=" text-[#6b7280] text-sm ">Name</FormLabel>
+                <FormControl>
+                  <Input
+                    className="w-full text-sm bg-white border-blue-300 focus:border-blue-500  focus:bg-[#eaf5fb] !mt-0"
+                    type="name"
+                    placeholder="Enter your name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className=" text-[#6b7280] text-sm ">Email</FormLabel>
                 <FormControl>
                   <Input
+                    className="w-full text-sm bg-white border-blue-300 focus:border-blue-500  focus:bg-[#eaf5fb] !mt-0"
                     type="email"
                     placeholder="Enter your email"
                     {...field}
@@ -116,69 +121,38 @@ const SignupForm = () => {
               </FormItem>
             )}
           />
-          {otpSent && (
-            <>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="Enter your name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
               <FormItem>
-                <FormLabel>OTP</FormLabel>
+                <FormLabel className=" text-[#6b7280] text-sm mb-2">Password</FormLabel>
                 <FormControl>
                   <Input
-                    type="text"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full text-sm bg-white border-blue-300 focus:border-blue-500  focus:bg-[#eaf5fb] !mt-0"
+                    type="password"
+                    placeholder="Enter your password"
+                    {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
-            </>
-          )}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? "Processing..." : otpSent ? "Verify OTP" : "Sign Up"}
-            <MoveRight />
-          </Button>
+            )}
+          />
+          <div className=" border-b-2 w-full my-3 border-zinc-300" />
+          <div className="w-full">
+            <Button className="w-full bg-gradient-to-tl from-[#724bff] to-[#4f2dfb] text-white">
+              Sign In
+              <MoveRight />
+            </Button>
+          </div>
         </form>
       </Form>
       {error && <p className="text-red-500 text-sm">{error}</p>}
       {success && <p className="text-green-500 text-sm">{success}</p>}
+
       <div className="flex items-center justify-center gap-1 w-full">
-        <p className="text-[16px]">Already have an account?</p>
+        <p className="text-[16px]">Already have an accout?</p>
         <Link href="/login">
           <p className="text-[16px] text-blue-500">Log in</p>
         </Link>

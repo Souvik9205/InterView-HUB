@@ -1,6 +1,7 @@
 import { Marquee } from "@/constant";
 import { ArrowRight, Bell, ChevronRight, CircleUserRound, MonitorSmartphone, MoveRight, Sparkles } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const Hero = () => {
@@ -21,10 +22,12 @@ const Hero = () => {
             Elevate Your Productivity with Clever’s Intelligent Tools for Seamless Task <br></br>and Workflow Management.
           </p>
           <div className="flex gap-5  items-center justify-center w-full">
-            <button className="text-white bg-gradient-to-tl from-[#724bff] to-[#4f2dfb]  px-[26px] flex items-center justify-center gap-2 py-[19.6px] rounded-full">
-              Get Start
-              <ChevronRight size={20} />
-            </button>
+            <Link href={"/dashboard"}>
+              <button className="text-white bg-gradient-to-tl from-[#724bff] to-[#4f2dfb]  px-[26px] flex items-center justify-center gap-2 py-[19.6px] rounded-full">
+                Get Start
+                <ChevronRight size={20} />
+              </button>
+            </Link>
             <button className="border-2 border-[#d1d1d1] bg-[#F4F7F9] px-6 flex items-center py-4 rounded-full">Learn More</button>
           </div>
         </div>
