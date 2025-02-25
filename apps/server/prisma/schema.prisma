@@ -48,6 +48,7 @@ model JobPost {
   resumeRequired  Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  jobType         InterviewType
 
   invites         InterviewInvite[]
   interviews      Interview[]
@@ -80,13 +81,11 @@ model Interview {
   candidateId       String?        
   candidate         User?          @relation(fields: [candidateId], references: [id])
 
-  jobPostId         String?        
-  jobPost           JobPost?       @relation(fields: [jobPostId], references: [id])
+  jobPostId         String        
+  jobPost           JobPost       @relation(fields: [jobPostId], references: [id])
 
   interviewInviteId String?        @unique
   interviewInvite   InterviewInvite? @relation(fields: [interviewInviteId], references: [id])
-  
-  interviewType     InterviewType 
   
   status            InterviewStatus  @default(PENDING)
   evaluationData    Json?        

@@ -39,6 +39,7 @@ export const jobCreateService = async (
         followUp: data.followUp,
         totalQuestions: data.totalQuestions,
         resumeRequired: data.resumeRequired,
+        jobType: data.jobType,
       },
       select: {
         id: true,
