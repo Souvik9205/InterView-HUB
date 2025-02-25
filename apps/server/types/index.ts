@@ -22,3 +22,8 @@ export interface jobCreateData {
   resumeRequired: boolean;
   jobType: InterviewType;
 }
+
+export interface addInterviewQAServiceData {
+  question: string;
+  answer: string;
+}
