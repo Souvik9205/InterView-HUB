@@ -63,7 +63,6 @@ model JobQuestion {
   createdAt  DateTime @default(now())
 }
 
-
 model InterviewInvite {
   id         String         @id @default(uuid())
   jobPostId  String
@@ -87,12 +86,7 @@ model Interview {
   interviewInviteId String?        @unique
   interviewInvite   InterviewInvite? @relation(fields: [interviewInviteId], references: [id])
   
-  interviewType     InterviewType
-
-  topics            String[]    
-  questionCount     Int?       
-  difficulty        Difficulty?   
-  followUp          Boolean?   
+  interviewType     InterviewType 
   
   status            InterviewStatus  @default(PENDING)
   evaluationData    Json?        
@@ -108,8 +102,8 @@ model InterviewQA {
   interviewId  String
   interview    Interview @relation(fields: [interviewId], references: [id])
   question     String
-  answer       String?   
-  order        Int?      
+  answer       String  
+  order        Int      
   createdAt    DateTime  @default(now())
 }
 
