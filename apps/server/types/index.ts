@@ -1,4 +1,7 @@
-import { QuestionType as PrismaQuestionType } from "@prisma/client";
+import {
+  InterviewType,
+  QuestionType as PrismaQuestionType,
+} from "@prisma/client";
 
 export interface successfulAuthResponse {
   status: number;
@@ -17,4 +20,5 @@ export interface jobCreateData {
   followUp: boolean;
   totalQuestions: number;
   resumeRequired: boolean;
+  jobType: InterviewType;
 }

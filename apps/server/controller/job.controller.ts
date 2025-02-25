@@ -26,6 +26,7 @@ export const jobCreateController = async (
     followUp,
     totalQuestions,
     resumeRequired,
+    jobType,
   } = req.body;
   const data = {
     category,
@@ -35,11 +36,14 @@ export const jobCreateController = async (
     followUp,
     totalQuestions,
     resumeRequired,
+    jobType,
   };
-  if (!category || !roles) {
+  if (!category || !roles || !jobType) {
     res
       .status(400)
-      .json({ message: "Missing required fields category and roles" });
+      .json({
+        message: "Missing required fields category, job type and roles",
+      });
     return;
   }
 
