@@ -1,3 +1,5 @@
+import { QuestionType as PrismaQuestionType } from "@prisma/client";
+
 export interface successfulAuthResponse {
   status: number;
   data: {
@@ -6,15 +8,12 @@ export interface successfulAuthResponse {
     refreshToken: string;
   };
 }
-export enum QuestionType {
-  HARDCODED,
-  AI_GENERATED,
-}
+
 export interface jobCreateData {
   category: string;
   roles: [string];
   videoRequired: boolean;
-  questionType: QuestionType;
+  questionType: PrismaQuestionType;
   followUp: boolean;
   totalQuestions: number;
   resumeRequired: boolean;
